@@ -1,5 +1,71 @@
-# Vue 3 + Vite
+# 🌿 Smart Garden Assistant
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Một ứng dụng Vue.js thông minh giúp quản lý vườn cây với trợ lý AI Gemini. Bạn có thể thêm cây, mô tả tình trạng, và trò chuyện với AI để nhận tư vấn chăm sóc cây.
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+## ✨ Tính năng
+
+- **Thêm cây mới**: Nhập tên và tình trạng ban đầu
+- **Tóm tắt tự động**: AI tự động tóm tắt tình trạng cây dựa trên cuộc trò chuyện
+- **Trò chuyện với AI**: Tư vấn chăm sóc cây từ Gemini AI
+- **Lưu trữ cục bộ**: Dữ liệu được lưu trong localStorage
+- **Giao diện thân thiện**: Responsive và dễ sử dụng
+
+## 🚀 Cài đặt và chạy
+
+### Yêu cầu
+
+- Node.js (phiên bản 16+)
+- npm hoặc yarn
+
+### Cài đặt
+
+```bash
+npm install
+```
+
+### Chạy development server
+
+```bash
+npm run dev
+```
+
+Truy cập http://localhost:5173 để xem ứng dụng.
+
+### Build cho production
+
+```bash
+npm run build
+```
+
+## 🛠️ Công nghệ sử dụng
+
+- **Vue 3** - Framework frontend
+- **Vite** - Build tool và dev server
+- **Google Gemini AI** - Trợ lý AI cho tư vấn cây
+- **Local Storage** - Lưu trữ dữ liệu
+
+## 📁 Cấu trúc dự án
+
+```
+src/
+├── components/          # Các component Vue
+│   ├── AddPlantForm.vue
+│   ├── ChatInput.vue
+│   ├── ChatSection.vue
+│   ├── MessageBubble.vue
+│   ├── PlantList.vue
+│   └── PlantSidebar.vue
+├── composables/         # Logic tái sử dụng
+│   ├── useGemini.js
+│   └── useLocalStorage.js
+├── App.vue              # Component chính
+└── main.js              # Entry point
+```
+
+## 🔧 Cấu hình
+
+Để sử dụng Gemini AI, bạn cần API key từ Google AI Studio. Thay thế `API_KEY` trong `src/App.vue` bằng key của bạn.
+
+## 📝 License
+
+MIT License
