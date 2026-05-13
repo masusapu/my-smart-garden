@@ -6,14 +6,46 @@
 
 <script setup>
 import { computed } from "vue";
-import { marked } from "marked";
+import { marked, Renderer } from "marked";
 
 const props = defineProps({
   text: String,
   role: String,
 });
 
-const renderedText = computed(() => marked.parse(props.text, { breaks: true }));
+const escapeHtml = (value = "") =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+const isSafeUrl = (href = "") => {
+  try {
+    const url = new URL(href, window.location.origin);
+    return ["http:", "https:", "mailto:"].includes(url.protocol);
+  } catch (error) {
+    return false;
+  }
+};
+
+const renderer = new Renderer();
+
+renderer.link = function ({ href, title, tokens }) {
+  const text = this.parser.parseInline(tokens);
+  if (!isSafeUrl(href)) return text;
+
+  const safeHref = escapeHtml(href);
+  const safeTitle = title ? ` title="${escapeHtml(title)}"` : "";
+  return `<a href="${safeHref}"${safeTitle} target="_blank" rel="noopener noreferrer">${text}</a>`;
+};
+
+renderer.image = ({ text }) => escapeHtml(text);
+
+const renderedText = computed(() =>
+  marked.parse(escapeHtml(props.text), { breaks: true, renderer }),
+);
 </script>
 
 <style scoped>

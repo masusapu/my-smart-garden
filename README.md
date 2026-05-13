@@ -14,7 +14,7 @@ Một ứng dụng Vue.js thông minh giúp quản lý vườn cây với trợ 
 
 ### Yêu cầu
 
-- Node.js (phiên bản 16+)
+- Node.js (phiên bản 18+)
 - npm hoặc yarn
 
 ### Cài đặt
@@ -35,6 +35,7 @@ Truy cập http://localhost:5173 để xem ứng dụng.
 
 ```bash
 npm run build
+npm run start
 ```
 
 ## 🛠️ Công nghệ sử dụng
@@ -67,7 +68,7 @@ src/
 Để sử dụng Gemini AI, bạn cần API key từ Google AI Studio. Tạo file `.env` ở thư mục gốc dự án và thêm:
 
 ```bash
-VITE_GEMINI_API_KEY=your_api_key_here
+GEMINI_API_KEY=your_api_key_here
 ```
 
 ## 📝 License
