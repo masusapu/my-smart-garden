@@ -28,7 +28,7 @@ const addPlant = async ({ name, status, icon }) => {
     console.log("Prompt:", summaryPrompt);
     const summarizedStatus = await askGemini(summaryPrompt);
     console.log("Summarized status:", summarizedStatus);
-    if (summarizedStatus && !summarizedStatus.includes("Lỗi")) {
+    if (summarizedStatus && !summarizedStatus.includes("error")) {
       finalStatus = summarizedStatus.trim();
     }
   } catch (error) {
@@ -76,7 +76,7 @@ Hãy trả lời chi tiết, với những lời khuyên cụ thể và thực t
   try {
     const statusPrompt = `Dựa trên lịch sử trò chuyện sau, tóm tắt tình trạng hiện tại của cây ${plant.name} một cách súc tích, dưới 10 từ. Chỉ trả lời tóm tắt. Lịch sử: ${JSON.stringify(plant.history)}`;
     const newStatus = await askGemini(statusPrompt);
-    if (newStatus && !newStatus.includes("Lỗi")) {
+    if (newStatus && !newStatus.includes("error")) {
       plant.status = newStatus.trim();
     }
   } catch (error) {
