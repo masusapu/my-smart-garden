@@ -14,9 +14,13 @@ const selectedPlant = ref(null);
 const chatSectionRef = ref(null);
 const addingLoading = ref(false);
 
+const selectPlant = (plant) => {
+  selectedPlant.value = plant;
+};
+
 // Thêm cây mới
-const addPlant = async ({ name, status }) => {
-  console.log("Adding plant:", name, status);
+const addPlant = async ({ name, status, icon }) => {
+  console.log("Adding plant:", name, status, icon);
   addingLoading.value = true;
   let finalStatus = status;
   try {
@@ -36,6 +40,7 @@ const addPlant = async ({ name, status }) => {
     id: Date.now(),
     name,
     status: finalStatus,
+    icon: icon || "🌱",
     history: [],
   };
   myGarden.value.push(plant);
@@ -91,7 +96,7 @@ Hãy trả lời chi tiết, với những lời khuyên cụ thể và thực t
       :selected-plant="selectedPlant"
       :adding-loading="addingLoading"
       @add-plant="addPlant"
-      @select-plant="selectedPlant = $event"
+      @select-plant="selectPlant"
     />
     <ChatSection
       ref="chatSectionRef"
@@ -105,8 +110,12 @@ Hãy trả lời chi tiết, với những lời khuyên cụ thể và thực t
 <style scoped>
 .container {
   display: flex;
-  height: 90vh;
+  height: calc(100vh - 40px);
   gap: 20px;
-  font-family: sans-serif;
+  padding: 20px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: #f5faf5;
+  border-radius: 30px;
+  box-shadow: 0 24px 70px rgba(100, 100, 120, 0.08);
 }
 </style>

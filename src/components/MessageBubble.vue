@@ -20,7 +20,7 @@ const renderedText = computed(() => marked.parse(props.text, { breaks: true }));
 .msg {
   display: flex;
   width: 100%;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   text-align: left;
 }
 .msg.model {
@@ -30,20 +30,21 @@ const renderedText = computed(() => marked.parse(props.text, { breaks: true }));
   justify-content: flex-end;
 }
 .bubble {
-  max-width: 80%;
-  padding: 10px 16px;
-  border-radius: 18px;
-  line-height: 1.6;
+  max-width: 78%;
+  padding: 14px 18px;
+  border-radius: 24px;
+  line-height: 1.7;
   font-size: 15px;
 }
 .model .bubble {
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-bottom-left-radius: 4px;
+  background: #ffffff;
+  border: 1px solid rgba(143, 198, 185, 0.35);
+  color: #334d3c;
+  border-bottom-left-radius: 12px;
 }
 .user .bubble {
   background: #27ae60;
   color: white;
-  border-bottom-right-radius: 4px;
+  border-bottom-right-radius: 12px;
 }
 </style>

@@ -28,10 +28,21 @@ defineEmits(["add-plant", "select-plant"]);
 
 <style scoped>
 .sidebar {
-  width: 300px;
-  border-right: 1px solid #eee;
-  padding: 10px;
+  width: 320px;
+  background: #ffffff;
+  border-radius: 28px;
+  border: 1px solid rgba(150, 200, 170, 0.35);
+  padding: 20px;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  box-shadow: 0 16px 32px rgba(120, 140, 120, 0.08);
+}
+.sidebar h2 {
+  margin-bottom: 18px;
+  font-size: 1.55rem;
+  letter-spacing: 0.02em;
+  color: #2f6b4f;
 }
 </style>
