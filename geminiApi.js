@@ -19,8 +19,49 @@ const readJsonBody = (request) =>
     });
   });
 
-const sendJson = (response, statusCode, payload) => {
-  response.writeHead(statusCode, { "Content-Type": "application/json" });
+const rateLimitStore = new Map();
+
+const getRateLimitConfig = () => ({
+  maxRequests: Number(process.env.GEMINI_RATE_LIMIT_MAX || 10),
+  windowMs: Number(process.env.GEMINI_RATE_LIMIT_WINDOW_MS || 60_000),
+});
+
+const getClientId = (request) => {
+  const forwardedFor = request.headers["x-forwarded-for"];
+  if (typeof forwardedFor === "string" && forwardedFor.trim()) {
+    return forwardedFor.split(",")[0].trim();
+  }
+
+  return request.socket?.remoteAddress || "unknown";
+};
+
+const checkRateLimit = (request) => {
+  const { maxRequests, windowMs } = getRateLimitConfig();
+  const clientId = getClientId(request);
+  const now = Date.now();
+  const current = rateLimitStore.get(clientId);
+
+  if (!current || current.resetAt <= now) {
+    rateLimitStore.set(clientId, { count: 1, resetAt: now + windowMs });
+    return { allowed: true };
+  }
+
+  if (current.count >= maxRequests) {
+    return {
+      allowed: false,
+      retryAfterSeconds: Math.ceil((current.resetAt - now) / 1000),
+    };
+  }
+
+  current.count += 1;
+  return { allowed: true };
+};
+
+const sendJson = (response, statusCode, payload, headers = {}) => {
+  response.writeHead(statusCode, {
+    "Content-Type": "application/json",
+    ...headers,
+  });
   response.end(JSON.stringify(payload));
 };
 
@@ -58,6 +99,17 @@ const askGemini = async (prompt, apiKey) => {
 export const handleGeminiRequest = async (request, response, apiKey) => {
   if (request.method !== "POST") {
     sendJson(response, 405, { error: "Method not allowed." });
+    return;
+  }
+
+  const rateLimit = checkRateLimit(request);
+  if (!rateLimit.allowed) {
+    sendJson(
+      response,
+      429,
+      { error: "Too many requests. Please try again later." },
+      { "Retry-After": String(rateLimit.retryAfterSeconds) },
+    );
     return;
   }
 

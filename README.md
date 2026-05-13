@@ -69,6 +69,8 @@ src/
 
 ```bash
 GEMINI_API_KEY=your_api_key_here
+GEMINI_RATE_LIMIT_MAX=10
+GEMINI_RATE_LIMIT_WINDOW_MS=60000
 ```
 
 ## 📝 License
