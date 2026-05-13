@@ -52,9 +52,14 @@ const sendMessage = async (userText) => {
   plant.history.push({ role: "user", text: userText });
 
   // 2. Tạo prompt dựa trên ngữ cảnh của cây
-  const prompt = `Bạn là trợ lý AI chuyên về cây trồng. Trả lời câu hỏi về cây ${plant.name} (tình trạng: ${plant.status}) một cách hữu ích và trực tiếp, không cần chào hỏi lặp lại. 
-                  Lịch sử trò chuyện: ${JSON.stringify(plant.history)}. 
-                  Câu hỏi mới: ${userText}`;
+  const prompt = `Bạn là một chuyên gia về cây trồng thân thiện, thoải mái. Hãy trả lời với tone tự nhiên, chia sẻ chi tiết cụ thể, như một người bạn đang giúp đỡ. Không cần quá trang trọng, hãy nói những gì bạn thực sự nghĩ. Chỉ tránh lặp lại lời chào nhiều lần nếu đã nói trong cuộc trò chuyện trước.
+
+Cây đang chăm sóc: ${plant.name} (tình trạng: ${plant.status})
+Lịch sử trò chuyện: ${JSON.stringify(plant.history)}
+
+Câu hỏi: ${userText}
+
+Hãy trả lời chi tiết, với những lời khuyên cụ thể và thực tế.`;
 
   // 3. Hỏi Gemini
   const response = await askGemini(prompt);
