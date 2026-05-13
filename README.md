@@ -64,7 +64,11 @@ src/
 
 ## 🔧 Cấu hình
 
-Để sử dụng Gemini AI, bạn cần API key từ Google AI Studio. Thay thế `API_KEY` trong `src/App.vue` bằng key của bạn.
+Để sử dụng Gemini AI, bạn cần API key từ Google AI Studio. Tạo file `.env` ở thư mục gốc dự án và thêm:
+
+```bash
+VITE_GEMINI_API_KEY=your_api_key_here
+```
 
 ## 📝 License
 

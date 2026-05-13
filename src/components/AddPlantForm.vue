@@ -41,10 +41,14 @@ const props = defineProps({
 const emit = defineEmits(["add-plant"]);
 
 const handleAdd = () => {
-  if (!plantName.value || props.loading) return;
+  const name = plantName.value.trim();
+  const status = plantStatus.value.trim();
+
+  if (!name || props.loading) return;
+
   emit("add-plant", {
-    name: plantName.value,
-    status: plantStatus.value,
+    name,
+    status,
     icon: selectedIcon.value,
   });
   plantName.value = "";

@@ -42,6 +42,8 @@ const chatContainer = ref(null);
 defineExpose({
   scrollToBottom: async () => {
     await nextTick();
+    if (!chatContainer.value) return;
+
     chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
   },
 });

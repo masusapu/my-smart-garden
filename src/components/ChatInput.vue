@@ -21,8 +21,11 @@ const props = defineProps({
 const emit = defineEmits(["send-message"]);
 
 const handleSend = () => {
-  if (!message.value || props.isLoading) return;
-  emit("send-message", message.value);
+  const trimmedMessage = message.value.trim();
+
+  if (!trimmedMessage || props.isLoading) return;
+
+  emit("send-message", trimmedMessage);
   message.value = "";
 };
 </script>

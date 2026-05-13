@@ -1,14 +1,18 @@
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
 export function useGemini(apiKey) {
-  const isLoading = ref(false);
+  const activeRequests = ref(0);
+  const isLoading = computed(() => activeRequests.value > 0);
 
-  const askGemini = async (prompt) => {
+  const askGemini = async (prompt, { trackLoading = true } = {}) => {
     if (!apiKey?.trim()) {
-      return "Gemini API key is not configured.";
+      return { ok: false, error: "Gemini API key is not configured." };
     }
 
-    isLoading.value = true;
+    if (trackLoading) {
+      activeRequests.value += 1;
+    }
+
     try {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey.trim()}`;
       const response = await fetch(url, {
@@ -22,15 +26,21 @@ export function useGemini(apiKey) {
 
       if (!response.ok) {
         const message = data?.error?.message || "Unable to call Gemini.";
-        return `Gemini error: ${message}`;
+        return { ok: false, error: `Gemini error: ${message}` };
       }
 
       const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      return text || "Gemini did not return usable content.";
+      if (!text) {
+        return { ok: false, error: "Gemini did not return usable content." };
+      }
+
+      return { ok: true, text };
     } catch (e) {
-      return "AI connection error.";
+      return { ok: false, error: "AI connection error." };
     } finally {
-      isLoading.value = false;
+      if (trackLoading) {
+        activeRequests.value -= 1;
+      }
     }
   };
 

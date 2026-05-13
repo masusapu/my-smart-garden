@@ -26,10 +26,12 @@ const addPlant = async ({ name, status, icon }) => {
   try {
     const summaryPrompt = `Tóm tắt tình trạng cây "${name}" với vấn đề "${status}" một cách súc tích, dưới 10 từ. Chỉ trả lời tóm tắt, không thêm gì khác.`;
     console.log("Prompt:", summaryPrompt);
-    const summarizedStatus = await askGemini(summaryPrompt);
+    const summarizedStatus = await askGemini(summaryPrompt, {
+      trackLoading: false,
+    });
     console.log("Summarized status:", summarizedStatus);
-    if (summarizedStatus && !summarizedStatus.includes("error")) {
-      finalStatus = summarizedStatus.trim();
+    if (summarizedStatus.ok) {
+      finalStatus = summarizedStatus.text.trim();
     }
   } catch (error) {
     console.error("Error summarizing:", error);
@@ -70,20 +72,27 @@ Hãy trả lời chi tiết, với những lời khuyên cụ thể và thực t
   const response = await askGemini(prompt);
 
   // 4. Lưu câu trả lời của Gemini vào đúng cây đó
-  plant.history.push({ role: "model", text: response });
+  plant.history.push({
+    role: "model",
+    text: response.ok ? response.text : response.error,
+  });
+
+  await nextTick();
+  chatSectionRef.value?.scrollToBottom();
+
+  if (!response.ok) return;
 
   // 5. Tóm tắt lại tình trạng dựa trên lịch sử mới
   try {
     const statusPrompt = `Dựa trên lịch sử trò chuyện sau, tóm tắt tình trạng hiện tại của cây ${plant.name} một cách súc tích, dưới 10 từ. Chỉ trả lời tóm tắt. Lịch sử: ${JSON.stringify(plant.history)}`;
-    const newStatus = await askGemini(statusPrompt);
-    if (newStatus && !newStatus.includes("error")) {
-      plant.status = newStatus.trim();
+    const newStatus = await askGemini(statusPrompt, { trackLoading: false });
+    if (newStatus.ok) {
+      plant.status = newStatus.text.trim();
     }
   } catch (error) {
     console.error("Error updating status:", error);
   }
 
-  // Cuộn xuống cuối khung chat
   await nextTick();
   chatSectionRef.value?.scrollToBottom();
 };
