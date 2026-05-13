@@ -5,7 +5,7 @@ import { useGemini } from "./composables/useGemini";
 import PlantSidebar from "./components/PlantSidebar.vue";
 import ChatSection from "./components/ChatSection.vue";
 
-const API_KEY = "YOUR_GEMINI_API_KEY_HERE"; // Get your API key from https://aistudio.google.com/
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const { isLoading, askGemini } = useGemini(API_KEY);
 
 // Quản lý danh sách cây
