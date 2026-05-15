@@ -21,9 +21,9 @@ const readJsonBody = (request) =>
 
 const rateLimitStore = new Map();
 
-const getRateLimitConfig = () => ({
-  maxRequests: Number(process.env.GEMINI_RATE_LIMIT_MAX || 10),
-  windowMs: Number(process.env.GEMINI_RATE_LIMIT_WINDOW_MS || 60_000),
+const getRateLimitConfig = (config) => ({
+  maxRequests: Number(config.GEMINI_RATE_LIMIT_MAX || 10),
+  windowMs: Number(config.GEMINI_RATE_LIMIT_WINDOW_MS || 60_000),
 });
 
 const getClientId = (request) => {
@@ -35,8 +35,8 @@ const getClientId = (request) => {
   return request.socket?.remoteAddress || "unknown";
 };
 
-const checkRateLimit = (request) => {
-  const { maxRequests, windowMs } = getRateLimitConfig();
+const checkRateLimit = (request, config) => {
+  const { maxRequests, windowMs } = getRateLimitConfig(config);
   const clientId = getClientId(request);
   const now = Date.now();
   const current = rateLimitStore.get(clientId);
@@ -96,13 +96,14 @@ const askGemini = async (prompt, apiKey) => {
   };
 };
 
-export const handleGeminiRequest = async (request, response, apiKey) => {
+export const handleGeminiRequest = async (request, response, config) => {
+  const apiKey = config.GEMINI_API_KEY;
   if (request.method !== "POST") {
     sendJson(response, 405, { error: "Method not allowed." });
     return;
   }
 
-  const rateLimit = checkRateLimit(request);
+  const rateLimit = checkRateLimit(request, config);
   if (!rateLimit.allowed) {
     sendJson(
       response,
