@@ -3,7 +3,7 @@
     <input
       v-model="message"
       @keyup.enter="handleSend"
-      placeholder="Hỏi về cây này..."
+      placeholder="Kể về vườn của bạn đi..."
     />
     <button @click="handleSend" :disabled="isLoading">Gửi</button>
   </div>

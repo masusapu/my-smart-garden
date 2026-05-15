@@ -1,14 +1,12 @@
 <template>
-  <div class="chat-section" v-if="selectedPlant">
+  <div class="chat-section">
     <h3 class="chat-title">
-      <span class="chat-title-icon" aria-hidden="true">
-        {{ selectedPlant.icon || "🌱" }}
-      </span>
-      <span>{{ selectedPlant.name }}</span>
+      <span class="chat-title-icon" aria-hidden="true">🤖</span>
+      <span>Trợ lý Vườn Thông Minh</span>
     </h3>
     <div class="chat-box" ref="chatContainer">
       <MessageBubble
-        v-for="(msg, i) in selectedPlant.history"
+        v-for="(msg, i) in history"
         :key="i"
         :text="msg.text"
         :role="msg.role"
@@ -19,9 +17,6 @@
       @send-message="$emit('send-message', $event)"
     />
   </div>
-  <div class="chat-section empty" v-else>
-    <p>Chọn một cây để bắt đầu tư vấn riêng biệt</p>
-  </div>
 </template>
 
 <script setup>
@@ -30,7 +25,7 @@ import MessageBubble from "./MessageBubble.vue";
 import ChatInput from "./ChatInput.vue";
 
 const props = defineProps({
-  selectedPlant: Object,
+  history: Array,
   isLoading: Boolean,
 });
 

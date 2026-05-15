@@ -1,10 +1,9 @@
 <template>
   <div class="sidebar">
     <h2>🌿 Vườn Của Tôi</h2>
-    <AddPlantForm
-      :loading="addingLoading"
-      @add-plant="$emit('add-plant', $event)"
-    />
+    <p class="hint">
+      Danh sách cây sẽ tự động cập nhật khi bạn trò chuyện với Gemini.
+    </p>
     <PlantList
       :plants="plants"
       :selected-plant="selectedPlant"
@@ -14,16 +13,14 @@
 </template>
 
 <script setup>
-import AddPlantForm from "./AddPlantForm.vue";
 import PlantList from "./PlantList.vue";
 
 defineProps({
   plants: Array,
   selectedPlant: Object,
-  addingLoading: Boolean,
 });
 
-defineEmits(["add-plant", "select-plant"]);
+defineEmits(["select-plant"]);
 </script>
 
 <style scoped>
@@ -38,6 +35,12 @@ defineEmits(["add-plant", "select-plant"]);
   min-height: 0;
   overflow: hidden;
   box-shadow: 0 16px 32px rgba(120, 140, 120, 0.08);
+}
+.hint {
+  font-size: 0.85rem;
+  color: #6a7c76;
+  margin-bottom: 20px;
+  font-style: italic;
 }
 .sidebar h2 {
   margin-bottom: 18px;

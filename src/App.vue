@@ -8,89 +8,114 @@ import ChatSection from "./components/ChatSection.vue";
 const { isLoading, askGemini } = useGemini();
 
 // Quản lý danh sách cây
-const myGarden = useLocalStorage("smart-garden-v2", []);
+const myGarden = useLocalStorage("smart-garden-plants-v3", []);
+
+// Cây đang được chọn để tập trung trò chuyện
 const selectedPlant = ref(null);
-const chatSectionRef = ref(null);
-const addingLoading = ref(false);
+const selectPlant = async (plant) => {
+  // Nếu nhấn lại chính cây đang chọn thì không làm gì cả
+  if (selectedPlant.value?.id === plant.id) return;
 
-const selectPlant = (plant) => {
   selectedPlant.value = plant;
-};
 
-// Thêm cây mới
-const addPlant = async ({ name, status, icon }) => {
-  console.log("Adding plant:", name, status, icon);
-  addingLoading.value = true;
-  let finalStatus = status;
-  try {
-    const summaryPrompt = `Tóm tắt tình trạng cây "${name}" với vấn đề "${status}" một cách súc tích, dưới 10 từ. Chỉ trả lời tóm tắt, không thêm gì khác.`;
-    console.log("Prompt:", summaryPrompt);
-    const summarizedStatus = await askGemini(summaryPrompt, {
-      trackLoading: false,
-    });
-    console.log("Summarized status:", summarizedStatus);
-    if (summarizedStatus.ok) {
-      finalStatus = summarizedStatus.text.trim();
+  // Tự động yêu cầu Gemini hỏi thăm về cây vừa chọn
+  const prompt = `Người dùng vừa chọn xem cây: ${plant.name} (tình trạng: ${plant.status}).
+  Hãy đóng vai chuyên gia làm vườn, hỏi thăm tình trạng của riêng cây này một cách cực kỳ ngắn gọn, tự nhiên.
+  TUYỆT ĐỐI KHÔNG được bắt đầu bằng các câu chào hỏi xã giao như "Chào bạn", "Chào anh/chị".
+  Ví dụ: "Cây ${plant.name} dạo này thế nào rồi?" hoặc "${plant.name} của bạn vẫn ổn chứ?".
+  
+  Lưu ý: Luôn đính kèm danh sách cây trong thẻ <GARDEN_STATE>...</GARDEN_STATE> ở cuối câu trả lời.
+  Danh sách hiện tại: ${JSON.stringify(myGarden.value)}`;
+
+  const response = await askGemini(prompt);
+  if (!response.ok) return;
+
+  let aiText = response.text;
+  const gardenStateMatch = aiText.match(
+    /<GARDEN_STATE>([\s\S]*?)<\/GARDEN_STATE>/,
+  );
+
+  if (gardenStateMatch) {
+    try {
+      myGarden.value = JSON.parse(gardenStateMatch[1]);
+      aiText = aiText
+        .replace(/<GARDEN_STATE>[\s\S]*?<\/GARDEN_STATE>/, "")
+        .trim();
+    } catch (e) {
+      console.error(e);
     }
-  } catch (error) {
-    console.error("Error summarizing:", error);
-  } finally {
-    addingLoading.value = false;
   }
-  const plant = {
-    id: Date.now(),
-    name,
-    status: finalStatus,
-    icon: icon || "🌱",
-    history: [],
-  };
-  myGarden.value.push(plant);
-  console.log("Plant added with status:", finalStatus);
+
+  chatHistory.value.push({ role: "model", text: aiText });
+  await nextTick();
+  chatSectionRef.value?.scrollToBottom();
 };
 
-// Gửi tin nhắn trong khung chat của từng cây
+// Quản lý lịch sử chat chung
+const chatHistory = useLocalStorage("smart-garden-chat-v3", [
+  {
+    role: "model",
+    text: "Chào bạn! Vườn của bạn hôm nay thế nào? Hãy kể cho tôi nghe về những mầm xanh mới hoặc tình hình các cây nhé!",
+  },
+]);
+
+const chatSectionRef = ref(null);
+
 const sendMessage = async (userText) => {
   if (!userText || isLoading.value) return;
 
-  const plant = selectedPlant.value;
+  // 1. Lưu tin nhắn của người dùng vào lịch sử chung
+  chatHistory.value.push({ role: "user", text: userText });
 
-  // 1. Lưu tin nhắn của người dùng vào lịch sử cây đó
-  plant.history.push({ role: "user", text: userText });
+  // 2. Tạo prompt yêu cầu Gemini trả về phản hồi + danh sách cây cập nhật
+  const currentPlantsStr = JSON.stringify(myGarden.value);
+  const prompt = `Bạn là một chuyên gia làm vườn thông minh.
+Nhiệm vụ của bạn:
+1. Trả lời người dùng một cách thân thiện, chi tiết về cách chăm sóc cây. TUYỆT ĐỐI KHÔNG chào hỏi ở đầu câu trả lời. Hãy đi thẳng vào nội dung tư vấn.
+2. Theo dõi danh sách cây trồng trong vườn dựa trên cuộc hội thoại.
+3. Nếu người dùng nhắc đến cây mới, hãy thêm vào danh sách. Nếu nhắc đến tình trạng mới của cây cũ, hãy cập nhật.
+4. CUỐI CÙNG của câu trả lời, hãy luôn đính kèm danh sách TOÀN BỘ các cây hiện có trong vườn dưới định dạng JSON nằm trong thẻ <GARDEN_STATE>...</GARDEN_STATE>.
+   Mỗi cây gồm: { "id": số, "name": "tên", "status": "tóm tắt tình trạng ngắn gọn", "icon": "emoji đại diện" }
+   Nếu người dùng muốn xóa một cây, hãy loại bỏ nó khỏi danh sách JSON này.
+   Nếu không có thay đổi, vẫn phải gửi lại danh sách cũ trong thẻ đó.
+5. ĐẶC BIỆT: Nếu người dùng đang chọn một cây cụ thể (thông tin bên dưới), hãy ưu tiên trả lời về cây đó trừ khi họ hỏi sang vấn đề khác.
 
-  // 2. Tạo prompt dựa trên ngữ cảnh của cây
-  const prompt = `Bạn là một chuyên gia về cây trồng thân thiện, thoải mái. Hãy trả lời với tone tự nhiên, chia sẻ chi tiết cụ thể, như một người bạn đang giúp đỡ. Không cần quá trang trọng, hãy nói những gì bạn thực sự nghĩ. Chỉ tránh lặp lại lời chào nhiều lần nếu đã nói trong cuộc trò chuyện trước.
+Danh sách cây hiện tại: ${currentPlantsStr}
+Lịch sử trò chuyện: ${JSON.stringify(chatHistory.value)}
 
-Cây đang chăm sóc: ${plant.name} (tình trạng: ${plant.status})
-Lịch sử trò chuyện: ${JSON.stringify(plant.history)}
+Thông tin bổ sung: Người dùng đang chọn xem cây: ${selectedPlant.value ? selectedPlant.value.name : "Không có cây nào cụ thể"}.
+Câu hỏi của người dùng: "${userText}"`;
 
-Câu hỏi: ${userText}
-
-Hãy trả lời chi tiết, với những lời khuyên cụ thể và thực tế.`;
-
-  // 3. Hỏi Gemini
   const response = await askGemini(prompt);
-
-  // 4. Lưu câu trả lời của Gemini vào đúng cây đó
-  plant.history.push({
-    role: "model",
-    text: response.ok ? response.text : response.error,
-  });
-
-  await nextTick();
-  chatSectionRef.value?.scrollToBottom();
-
-  if (!response.ok) return;
-
-  // 5. Tóm tắt lại tình trạng dựa trên lịch sử mới
-  try {
-    const statusPrompt = `Dựa trên lịch sử trò chuyện sau, tóm tắt tình trạng hiện tại của cây ${plant.name} một cách súc tích, dưới 10 từ. Chỉ trả lời tóm tắt. Lịch sử: ${JSON.stringify(plant.history)}`;
-    const newStatus = await askGemini(statusPrompt, { trackLoading: false });
-    if (newStatus.ok) {
-      plant.status = newStatus.text.trim();
-    }
-  } catch (error) {
-    console.error("Error updating status:", error);
+  if (!response.ok) {
+    chatHistory.value.push({
+      role: "model",
+      text: "Lỗi kết nối: " + response.error,
+    });
+    return;
   }
+
+  let aiText = response.text;
+
+  // 3. Tách phần text chat và phần dữ liệu vườn
+  const gardenStateMatch = aiText.match(
+    /<GARDEN_STATE>([\s\S]*?)<\/GARDEN_STATE>/,
+  );
+
+  if (gardenStateMatch) {
+    try {
+      const newGardenState = JSON.parse(gardenStateMatch[1]);
+      myGarden.value = newGardenState;
+      // Xóa phần JSON khỏi text hiển thị cho người dùng sạch sẽ
+      aiText = aiText
+        .replace(/<GARDEN_STATE>[\s\S]*?<\/GARDEN_STATE>/, "")
+        .trim();
+    } catch (e) {
+      console.error("Lỗi parse dữ liệu vườn:", e);
+    }
+  }
+
+  chatHistory.value.push({ role: "model", text: aiText });
 
   await nextTick();
   chatSectionRef.value?.scrollToBottom();
@@ -102,13 +127,11 @@ Hãy trả lời chi tiết, với những lời khuyên cụ thể và thực t
     <PlantSidebar
       :plants="myGarden"
       :selected-plant="selectedPlant"
-      :adding-loading="addingLoading"
-      @add-plant="addPlant"
       @select-plant="selectPlant"
     />
     <ChatSection
       ref="chatSectionRef"
-      :selected-plant="selectedPlant"
+      :history="chatHistory"
       :is-loading="isLoading"
       @send-message="sendMessage"
     />
