@@ -38,6 +38,9 @@ const processAiResponse = async (response) => {
     }
   }
 
+  // Chuyển đổi các chuỗi "\n" (literal) thành ký tự xuống dòng thực tế
+  aiText = aiText.replace(/\\n/g, "\n");
+
   chatHistory.value.push({ role: "model", text: aiText });
   await nextTick();
   chatSectionRef.value?.scrollToBottom();
@@ -62,6 +65,11 @@ const chatHistory = useLocalStorage("smart-garden-chat-v3", [
     text: PROMPTS.INITIAL_MESSAGE,
   },
 ]);
+
+// Tự động sửa lỗi xuống dòng cho các tin nhắn cũ đã lưu trong LocalStorage
+chatHistory.value.forEach((msg) => {
+  if (msg.text) msg.text = msg.text.replace(/\\n/g, "\n");
+});
 
 const chatSectionRef = ref(null);
 
@@ -110,5 +118,6 @@ const sendMessage = async (userText) => {
   background: #f5faf5;
   border-radius: 30px;
   box-shadow: 0 24px 70px rgba(100, 100, 120, 0.08);
+  overflow: hidden;
 }
 </style>
