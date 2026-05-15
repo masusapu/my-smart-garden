@@ -1,14 +1,14 @@
 # 🌿 Smart Garden Assistant
 
-Một ứng dụng Vue.js thông minh giúp quản lý vườn cây với trợ lý AI Gemini. Bạn có thể thêm cây, mô tả tình trạng, và trò chuyện với AI để nhận tư vấn chăm sóc cây.
+Một ứng dụng Vue.js thông minh giúp quản lý vườn cây với trợ lý AI Gemini. Thay vì nhập liệu thủ công, Gemini sẽ đóng vai trò quản gia tự động theo dõi, nhận diện và cập nhật tình trạng khu vườn thông qua cuộc trò chuyện tự nhiên.
 
 ## ✨ Tính năng
 
-- **Thêm cây mới**: Nhập tên và tình trạng ban đầu
-- **Tóm tắt tự động**: AI tự động tóm tắt tình trạng cây dựa trên cuộc trò chuyện
-- **Trò chuyện với AI**: Tư vấn chăm sóc cây từ Gemini AI
-- **Lưu trữ cục bộ**: Dữ liệu được lưu trong localStorage
-- **Giao diện thân thiện**: Responsive và dễ sử dụng
+- **Quản lý vườn tự động**: Gemini tự động nhận diện cây mới và cập nhật trạng thái dựa trên nội dung trò chuyện mà không cần form nhập liệu.
+- **Chat tập trung**: Trải nghiệm một khung chat duy nhất cho toàn bộ khu vườn, giúp cuộc hội thoại liền mạch và tự nhiên.
+- **Tương tác ngữ cảnh**: Khi chọn một cây cụ thể trong danh sách, Gemini sẽ chủ động hỏi thăm và tập trung tư vấn chuyên sâu cho cây đó.
+- **Đồng bộ LocalStorage**: Toàn bộ danh sách cây và lịch sử trò chuyện được lưu trữ cục bộ, đảm bảo dữ liệu không bị mất khi tải lại trang.
+- **Giao diện tối giản**: Loại bỏ các thao tác rườm rà, tập trung hoàn toàn vào việc chăm sóc cây qua AI.
 
 ## 🚀 Cài đặt và chạy
 
